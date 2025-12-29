@@ -1,0 +1,33 @@
+name: Deploy to GitHub Pages
+
+on:
+  # 当推送到main或master分支时触发部署
+  push:
+    branches: [ main, master ]
+  # 允许手动触发部署
+  workflow_dispatch:
+
+# 设置权限，允许部署到GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      # 配置GitHub Pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        
+      # 部署到GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+        with:
+          # 部署根目录
+          folder: ./

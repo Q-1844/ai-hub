@@ -1,0 +1,1607 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI Hub - 现代AI聊天界面，支持多种AI模型，提供流畅的聊天体验">
+    <meta name="keywords" content="AI聊天, AI助手, 聊天机器人, 人工智能, AI模型">
+    <meta name="author" content="AI Hub Team">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="AI Hub - Modern AI Chat Interface">
+    <meta property="og:description" content="AI Hub - 现代AI聊天界面，支持多种AI模型，提供流畅的聊天体验">
+    <meta property="og:type" content="website">
+    <title>AI Hub - Modern AI Chat Interface</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ff00ff',
+                        secondary: '#ff2a6d',
+                        dark: {
+                            100: '#1a1a2e',
+                            200: '#16213e',
+                            300: '#0f3460',
+                            400: '#0a0a0f'
+                        },
+                        light: {
+                            100: '#e0e0e0',
+                            200: '#b0b0b0',
+                            300: '#808080'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'scan': 'scan 2s linear infinite',
+                        'text-shine': 'textShine 3s ease-in-out infinite'
+                    },
+                    keyframes: {
+                        glow: {
+                            '0%': {
+                                'text-shadow': '0 0 5px #fff, 0 0 10px #fff, 0 0 15px var(--primary), 0 0 20px var(--primary)'
+                            },
+                            '100%': {
+                                'text-shadow': '0 0 10px #fff, 0 0 20px #fff, 0 0 30px var(--primary), 0 0 40px var(--primary)'
+                            }
+                        },
+                        scan: {
+                            '0%': {
+                                'background-position': '-100% center'
+                            },
+                            '100%': {
+                                'background-position': '200% center'
+                            }
+                        },
+                        textShine: {
+                            '0%': {
+                                'background-position': '-200% center'
+                            },
+                            '100%': {
+                                'background-position': '200% center'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 全局CSS变量定义 */
+        :root {
+            --primary: #ff00ff;
+            --secondary: #ff2a6d;
+            --bg-dark-400: #0a0a0f;
+        }
+    </style>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-gradient {
+                @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
+            }
+            .title-letter {
+                display: inline-block;
+                position: relative;
+                color: transparent;
+                background: linear-gradient(to right, var(--primary), var(--secondary));
+                background-clip: text;
+                -webkit-background-clip: text;
+            }
+            
+            .title-letter::before {
+                content: attr(data-letter);
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(to right, var(--primary), var(--secondary));
+                background-clip: text;
+                -webkit-background-clip: text;
+                color: transparent;
+                z-index: 1;
+            }
+            
+            .title-letter::after {
+                content: attr(data-letter);
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, white, transparent);
+                background-size: 200% 100%;
+                background-clip: text;
+                -webkit-background-clip: text;
+                color: transparent;
+                z-index: 2;
+                opacity: 0;
+                transition: opacity 0.1s ease;
+            }
+            
+            .title-letter.active::after {
+                opacity: 1;
+                animation: scanWord 0.7s ease-in-out;
+            }
+            
+            @keyframes scanWord {
+                0% {
+                    background-position: -100% center;
+                }
+                100% {
+                    background-position: 200% center;
+                }
+            }
+            .bg-gradient-dark {
+                @apply bg-gradient-to-b from-dark-400 to-dark-100;
+            }
+            .bg-gradient-primary {
+                @apply bg-gradient-to-r from-primary to-secondary;
+            }
+            .bg-gradient-primary-light {
+                @apply bg-gradient-to-r from-primary/20 to-secondary/20;
+            }
+            .border-glow {
+                @apply border border-primary/30 shadow-lg shadow-primary/20;
+            }
+            .hover-glow {
+                @apply transition-all duration-300 hover:shadow-lg hover:shadow-primary/30 hover:border-primary/50;
+            }
+            .active-glow {
+                @apply border-primary shadow-lg shadow-primary/30;
+            }
+            .scrollbar-thin {
+                scrollbar-width: thin;
+                scrollbar-color: rgba(255, 0, 255, 0.5) rgba(10, 10, 15, 0.5);
+            }
+            .scrollbar-thin::-webkit-scrollbar {
+                width: 6px;
+            }
+            .scrollbar-thin::-webkit-scrollbar-track {
+                background: rgba(10, 10, 15, 0.5);
+            }
+            .scrollbar-thin::-webkit-scrollbar-thumb {
+                background-color: rgba(255, 0, 255, 0.5);
+                border-radius: 20px;
+            }
+            .animate-fade-in {
+                animation: fadeIn 0.3s ease-in-out;
+            }
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px) translateX(-50%);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0) translateX(-50%);
+                }
+            }
+            /* 流式消息光标的闪烁动画 */
+            .streaming-cursor {
+                display: inline-block;
+                width: 0.5em;
+                margin-left: 1px;
+                color: var(--primary);
+                font-weight: bold;
+            }
+            
+            /* 打字机效果（逐字出现） */
+            @keyframes typewriter {
+                from { width: 0; }
+                to { width: 100%; }
+            }
+            
+            /* 消息容器的平滑过渡 */
+            .ai-message-content {
+                transition: min-height 0.1s ease;
+            }
+            
+            /* 错误消息样式 */
+            .error-message {
+                border-left: 3px solid #ef4444 !important;
+                background-color: rgba(239, 68, 68, 0.1) !important;
+            }
+            
+            /* 流式消息加载状态 */
+            .stream-message.loading .ai-message-content {
+                background: linear-gradient(90deg,
+                    rgba(255, 0, 255, 0.1) 0%,
+                    rgba(255, 42, 109, 0.15) 50%,
+                    rgba(255, 0, 255, 0.1) 100%);
+                background-size: 200% 100%;
+                animation: loadingShimmer 1.5s infinite;
+            }
+            
+            @keyframes loadingShimmer {
+                0% { background-position: 200% 0; }
+                100% { background-position: -200% 0; }
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-dark text-light-100 min-h-screen flex flex-col">
+    <div class="flex flex-1 overflow-hidden h-screen">
+        <!-- Left Sidebar -->
+        <div class="w-64 border-r border-white/10 flex flex-col bg-dark-400/50 backdrop-blur-sm">
+            <!-- Logo and Title -->
+            <div class="p-4 flex items-center justify-center border-b border-white/10">
+                <div class="flex items-center space-x-2">
+                    <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/984e11d83fc84e3dbb975b72cac00cc6~tplv-a9rns2rl98-image.image?rcl=2025122419021123EC4FF5AAF0EACD0EC3&amp;rk3s=8e244e95&amp;rrcfp=f06b921b&amp;x-expires=1769166156&amp;x-signature=rFJBG%2FgZAF1FR%2Fx3dniEOco0oqE%3D" alt="AI Hub Logo" class="w-10 h-10">
+                    <h1 class="text-2xl font-bold text-gradient" id="title-animation">AI Hub</h1>
+                </div>
+            </div>
+
+            <!-- New Chat Button -->
+            <div class="p-4">
+                <button id="new-chat-btn" class="w-full py-2 px-4 bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/30 rounded-lg hover-glow flex items-center justify-center space-x-2">
+                    <i class="fa fa-plus-circle"></i>
+                    <span>新对话</span>
+                </button>
+            </div>
+
+            <!-- Model Selection -->
+            <div class="p-4 border-t border-white/10 flex-1 overflow-y-auto scrollbar-thin">
+                <h2 class="text-light-200 text-sm uppercase tracking-wider mb-3">选择模型</h2>
+                <div class="grid grid-cols-1 gap-3" id="model-list">
+                    <!-- Model cards will be dynamically generated here -->
+                </div>
+            </div>
+
+            <!-- User Info -->
+            <div class="p-4 border-t border-white/10">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center">
+                        <i class="fa fa-user"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium">用户</p>
+                        <p class="text-xs text-light-300">免费版</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="flex-1 flex flex-col bg-dark-400/30">
+            <!-- Model Info Header -->
+            <div class="p-4 border-b border-white/10 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div id="current-model-icon" class="w-10 h-10 rounded bg-dark-100 flex items-center justify-center">
+                        <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/code_assistant/1c372342b6c54ec18733d1705fd796f6~tplv-a9rns2rl98-image.image?rcl=2025122517023270CF8ABF9F4DBA9C7DBD&amp;rk3s=8e244e95&amp;rrcfp=2609e108&amp;x-expires=1767258156&amp;x-signature=OCWrEF%2BwmZ3cugMQZRKnhhK4YUo%3D" alt="AI Icon" class="w-6 h-6 object-contain">
+                    </div>
+                    <div>
+                        <h2 id="current-model-name" class="text-xl font-semibold">选择一个模型开始对话</h2>
+                        <p id="current-model-desc" class="text-light-200 text-sm">从左侧选择一个AI模型开始聊天</p>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <button id="history-btn" class="p-2 rounded-full hover:bg-white/10 transition-colors">
+                        <i class="fa fa-history"></i>
+                    </button>
+                    <button id="settings-btn" class="p-2 rounded-full hover:bg-white/10 transition-colors">
+                        <i class="fa fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin">
+                <!-- Welcome Message -->
+                <div class="flex flex-col items-center justify-center h-full text-center">
+                    <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/984e11d83fc84e3dbb975b72cac00cc6~tplv-a9rns2rl98-image.image?rcl=2025122419021123EC4FF5AAF0EACD0EC3&amp;rk3s=8e244e95&amp;rrcfp=f06b921b&amp;x-expires=1769166156&amp;x-signature=rFJBG%2FgZAF1FR%2Fx3dniEOco0oqE%3D" alt="AI Hub Logo" class="w-24 h-24 mb-4 opacity-70">
+                    <h3 class="text-2xl font-bold text-gradient mb-2">欢迎使用 AI Hub</h3>
+                    <p class="text-light-200 max-w-md mb-6">选择一个AI模型开始对话，体验最先进的人工智能技术</p>
+                    <div class="flex flex-wrap justify-center gap-3">
+                        <button class="model-btn py-2 px-4 bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/30 rounded-lg hover-glow" data-model-id="deepseek-v32">
+                            <span class="text-gradient font-medium">深度求索 V3.2</span>
+                        </button>
+                        <button class="model-btn py-2 px-4 bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/30 rounded-lg hover-glow" data-model-id="tongyiqianwen3-max">
+                            <span class="text-gradient font-medium">通义千问3 Max</span>
+                        </button>
+                        <button class="model-btn py-2 px-4 bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/30 rounded-lg hover-glow" data-model-id="zhipu-glm46">
+                            <span class="text-gradient font-medium">智谱 GLM-4.6</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-4 border-t border-white/10">
+                <div class="relative">
+                    <textarea id="message-input" class="w-full py-3 px-4 pr-12 bg-dark-100/50 border border-white/10 rounded-lg focus:outline-none focus:border-primary/50 resize-none" rows="1" placeholder="输入消息..."></textarea>
+                    <button id="send-btn" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-gradient-to-r from-primary to-secondary rounded-full hover:shadow-lg hover:shadow-primary/30 transition-all">
+                        <i class="fa fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="flex justify-between items-center mt-2 text-xs text-light-300">
+                    <div>按 Enter 发送，Shift + Enter 换行</div>
+                    <div>AI Hub © 2025</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API配置
+        const API_CONFIG = {
+            iflow: {
+                key: 'sk-568e97a528aed87ecf6bcb7ef608663f',
+                url: 'https://apis.iflow.cn/v1/chat/completions'
+            }
+        };
+        
+        // 模型ID映射表（新界面ID -> iFlow API模型ID）
+        const modelIdMap = {
+            'deepseek-v32': 'deepseek-v3.2',
+            'tongyiqianwen3-max': 'qwen3-max',
+            'tongyiqianwen3-preview': 'qwen3-max-preview',
+            'tongyiqianwen3-235b-thinking': 'qwen3-235b-a22b-thinking-2507',
+            'tongyiqianwen3-coder': 'qwen3-coder-plus',
+            'kimi-k2-0905': 'kimi-k2-0905',
+            'zhipu-glm46': 'glm-4.6',
+            'tongyiqianwen3-vl': 'qwen3-vl-plus',
+            'tongyiqianwen3-instruct': 'qwen3-235b-a22b-instruct',
+            'kimi-k2': 'Kimi-K2',
+            'tongyiqianwen3-base': 'qwen3-235b',
+            'deepseek-r1': 'deepseek-r1',
+            'tongyiqianwen3-32b': 'qwen3-32b',
+            'deepseek-v3': 'deepseek-v3',
+            'tstars-20': 'tstars2.0'
+        };
+        
+        // Model data
+        const models = [
+            {
+                id: 'deepseek-v32',
+                name: '深度求索 - DeepSeek V3.2',
+                description: '最新旗舰，综合顶尖',
+                icon: 'D',
+                letter: 'D',
+                iflowModelId: 'deepseek-v3.2'
+            },
+            {
+                id: 'tongyiqianwen3-max',
+                name: '通义千问3 - Max',
+                description: '综合旗舰',
+                icon: 'T',
+                letter: 'T',
+                iflowModelId: 'qwen3-max'
+            },
+            {
+                id: 'tongyiqianwen3-preview',
+                name: '通义千问3 - Max Preview',
+                description: '前代综合旗舰',
+                icon: 'T',
+                letter: 'T',
+                iflowModelId: 'qwen3-max-preview'
+            },
+            {
+                id: 'tongyiqianwen3-235b-thinking',
+                name: '通义千问3 - 235B A22B Thinking-2507',
+                description: '开源思考SOTA',
+                icon: 'T',
+                letter: 'T',
+                iflowModelId: 'qwen3-235b-a22b-thinking-2507'
+            },
+            {
+                id: 'tongyiqianwen3-coder',
+                name: '通义千问3 - Coder Plus',
+                description: '代码旗舰',
+                icon: 'T',
+                letter: 'T',
+                iflowModelId: 'qwen3-coder-plus'
+            },
+            {
+                id: 'kimi-k2-0905',
+                name: 'Kimi - K2-0905',
+                description: '编程/工具调用强者',
+                icon: 'K',
+                letter: 'K',
+                iflowModelId: 'kimi-k2-0905'
+            },
+            {
+                id: 'zhipu-glm46',
+                name: '智谱 - GLM-4.6',
+                description: '多模态/思考链',
+                icon: 'Z',
+                letter: 'Z',
+                iflowModelId: 'glm-4.6'
+            },
+            {
+                id: 'tongyiqianwen3-vl',
+                name: '通义千问3 - VL Plus',
+                description: '视觉语言旗舰',
+                icon: 'T',
+                letter: 'T',
+                iflowModelId: 'qwen3-vl-plus'
+            },
+            {
+                id: 'tongyiqianwen3-instruct',
+                name: '通义千问3 - 235B A22B Instruct',
+                description: '高效指令版',
+                icon: 'T',
+                letter: 'T',
+                iflowModelId: 'qwen3-235b-a22b-instruct'
+            },
+            {
+                id: 'kimi-k2',
+                name: 'Kimi - K2',
+                description: '前代开源MoE标杆',
+                icon: 'K',
+                letter: 'K',
+                iflowModelId: 'Kimi-K2'
+            },
+            {
+                id: 'tongyiqianwen3-base',
+                name: '通义千问3 - 235B',
+                description: '基础MoE版',
+                icon: 'T',
+                letter: 'T',
+                iflowModelId: 'qwen3-235b'
+            },
+            {
+                id: 'deepseek-r1',
+                name: '深度求索 - DeepSeek R1',
+                description: '推理专项模型',
+                icon: 'D',
+                letter: 'D',
+                iflowModelId: 'deepseek-r1'
+            },
+            {
+                id: 'tongyiqianwen3-32b',
+                name: '通义千问3 - 32B',
+                description: '高效推理模型',
+                icon: 'T',
+                letter: 'T',
+                iflowModelId: 'qwen3-32b'
+            },
+            {
+                id: 'deepseek-v3',
+                name: '深度求索 - DeepSeek V3',
+                description: '前代通用MoE',
+                icon: 'D',
+                letter: 'D',
+                iflowModelId: 'deepseek-v3'
+            },
+            {
+                id: 'tstars-20',
+                name: 'TStars - 2.0',
+                description: '全能AI助手',
+                icon: 'T',
+                letter: 'T',
+                iflowModelId: 'tstars2.0'
+            }
+        ];
+
+        // State
+        let currentModel = null;
+        // 结构: { 'model-id': { conversations: [ { messages: [...], timestamp: Date } ], currentIndex: 0 } }
+        let chatHistories = {};
+        let currentMessages = []; // 当前模型的对话数组
+        
+        // DOM Elements - 这些将在initApp中初始化
+        let modelList, chatMessages, messageInput, sendBtn, newChatBtn;
+        let currentModelName, currentModelDesc, currentModelIcon;
+        
+        // 从localStorage加载聊天历史
+        function loadChatHistories() {
+            try {
+                const saved = localStorage.getItem('aiHubChatHistories');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    // 检查是否是旧结构，如果是则转换为新结构
+                    chatHistories = {};
+                    for (const [modelId, history] of Object.entries(parsed)) {
+                        if (Array.isArray(history)) {
+                            // 旧结构转换为新结构
+                            chatHistories[modelId] = {
+                                conversations: [{
+                                    messages: history,
+                                    timestamp: Date.now()
+                                }],
+                                currentIndex: 0
+                            };
+                        } else {
+                            // 新结构直接使用
+                            chatHistories[modelId] = history;
+                        }
+                    }
+                    
+                    // 过滤过期对话
+                    filterExpiredConversations();
+                }
+            } catch (error) {
+                console.error('加载聊天历史失败:', error);
+                chatHistories = {};
+            }
+        }
+        
+        // 过滤过期对话
+        function filterExpiredConversations() {
+            // 获取保存期限设置
+            let retentionDays = 'permanent';
+            
+            // 确保SettingsManager已初始化
+            if (window.SettingsManager) {
+                try {
+                    const settings = window.SettingsManager.getSettings();
+                    retentionDays = settings.history.retentionDays || 'permanent';
+                } catch (error) {
+                    console.error('获取设置失败:', error);
+                    return;
+                }
+            }
+            
+            if (retentionDays === 'permanent') {
+                return; // 永久保存，不过滤
+            }
+            
+            const now = Date.now();
+            const retentionMs = parseInt(retentionDays) * 24 * 60 * 60 * 1000;
+            
+            // 过滤每个模型的过期对话
+            for (const modelId in chatHistories) {
+                const modelHistory = chatHistories[modelId];
+                if (modelHistory && modelHistory.conversations) {
+                    const originalLength = modelHistory.conversations.length;
+                    modelHistory.conversations = modelHistory.conversations.filter(conv => {
+                        return (now - conv.timestamp) <= retentionMs;
+                    });
+                    
+                    // 如果当前对话索引超出范围，调整到最后一个有效对话
+                    if (modelHistory.currentIndex >= modelHistory.conversations.length) {
+                        modelHistory.currentIndex = Math.max(0, modelHistory.conversations.length - 1);
+                    }
+                    
+                    // 如果过滤掉了对话，记录日志
+                    if (modelHistory.conversations.length < originalLength) {
+                        console.log(`模型 ${modelId} 过滤掉 ${originalLength - modelHistory.conversations.length} 个过期对话`);
+                    }
+                }
+            }
+        }
+        
+        // 保存聊天历史到localStorage
+        function saveChatHistories(force = false) {
+            try {
+                // 检查自动保存设置
+                let shouldSave = true;
+                if (!force && window.SettingsManager) {
+                    const settings = window.SettingsManager.getSettings();
+                    shouldSave = settings.history.autoSave;
+                }
+                
+                if (shouldSave) {
+                    localStorage.setItem('aiHubChatHistories', JSON.stringify(chatHistories));
+                } else {
+                    console.log('自动保存已关闭，跳过保存');
+                }
+            } catch (error) {
+                console.error('保存聊天历史失败:', error);
+            }
+        }
+
+        // Initialize the app
+        function initApp() {
+            // 初始化DOM元素 - 现在DOM已经完全加载
+            modelList = document.getElementById('model-list');
+            chatMessages = document.getElementById('chat-messages');
+            messageInput = document.getElementById('message-input');
+            sendBtn = document.getElementById('send-btn');
+            newChatBtn = document.getElementById('new-chat-btn');
+            currentModelName = document.getElementById('current-model-name');
+            currentModelDesc = document.getElementById('current-model-desc');
+            currentModelIcon = document.getElementById('current-model-icon');
+            
+            // 确保DOM元素都已找到
+            if (!modelList || !chatMessages || !messageInput || !sendBtn) {
+                console.error('无法找到必要的DOM元素');
+                return;
+            }
+            
+            loadChatHistories();
+            renderModelList();
+            setupEventListeners();
+            setupTitleAnimation();
+        }
+
+        // Setup title animation
+        function setupTitleAnimation() {
+            const title = document.getElementById('title-animation');
+            const text = title.textContent;
+            title.innerHTML = '';
+            
+            // Create span for each letter
+            for (let i = 0; i < text.length; i++) {
+                const letterSpan = document.createElement('span');
+                letterSpan.textContent = text[i];
+                letterSpan.setAttribute('data-letter', text[i]);
+                letterSpan.className = 'title-letter';
+                title.appendChild(letterSpan);
+            }
+            
+            // Start the animation loop
+            animateTitleLoop();
+        }
+        
+        // Animate title letters in a loop
+        function animateTitleLoop() {
+            const letters = document.querySelectorAll('.title-letter');
+            let index = 0;
+            
+            function animateNextLetter() {
+                if (index < letters.length) {
+                    const letter = letters[index];
+                    if (letter.textContent.trim() !== '') { // Skip spaces
+                        letter.classList.add('active');
+                        
+                        // Remove active class after animation completes
+                        setTimeout(() => {
+                            letter.classList.remove('active');
+                        }, 700);
+                    }
+                    
+                    index++;
+                    setTimeout(animateNextLetter, 150);
+                } else {
+                    // Reset and start again after a pause
+                    index = 0;
+                    setTimeout(animateTitleLoop, 1000);
+                }
+            }
+            
+            animateNextLetter();
+        }
+
+        // Render the model list
+        function renderModelList() {
+            modelList.innerHTML = '';
+            models.forEach(model => {
+                const modelCard = document.createElement('div');
+                modelCard.className = 'model-card p-3 border border-white/10 rounded-lg hover-glow cursor-pointer flex items-center space-x-3';
+                modelCard.dataset.modelId = model.id;
+                
+                modelCard.innerHTML = `
+                    <div class="w-8 h-8 rounded bg-black flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">${model.letter}</span>
+                    </div>
+                    <div>
+                        <p class="font-medium">${model.name}</p>
+                        <p class="text-xs text-light-300">${model.description}</p>
+                    </div>
+                `;
+                
+                modelList.appendChild(modelCard);
+            });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Model selection
+            modelList.addEventListener('click', (e) => {
+                const modelCard = e.target.closest('.model-card');
+                if (modelCard) {
+                    const modelId = modelCard.dataset.modelId;
+                    selectModel(modelId);
+                }
+            });
+
+            // Welcome model buttons
+            document.querySelectorAll('.model-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const modelId = btn.dataset.modelId;
+                    selectModel(modelId);
+                });
+            });
+
+            // Send message
+            sendBtn.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Auto-resize textarea
+            function resizeTextarea() {
+                messageInput.style.height = 'auto';
+                messageInput.style.height = Math.min(messageInput.scrollHeight, 200) + 'px';
+            }
+            
+            // Initial resize
+            resizeTextarea();
+            
+            // Resize on input and other events
+            messageInput.addEventListener('input', resizeTextarea);
+            messageInput.addEventListener('change', resizeTextarea);
+            messageInput.addEventListener('paste', resizeTextarea);
+            messageInput.addEventListener('cut', resizeTextarea);
+            
+            // Add smooth transition
+            messageInput.style.transition = 'height 0.2s ease';
+
+            // New chat button
+            newChatBtn.addEventListener('click', startNewChat);
+            
+            // 历史记录相关事件
+            const historyBtn = document.getElementById('history-btn');
+            const closeHistoryBtn = document.getElementById('close-history');
+            const clearHistoryBtn = document.getElementById('clear-history');
+            const exportHistoryBtn = document.getElementById('export-history');
+            const historyModal = document.getElementById('history-modal');
+            
+            // 显示历史记录弹窗
+            historyBtn.addEventListener('click', showHistoryModal);
+            
+            // 关闭历史记录弹窗
+            closeHistoryBtn.addEventListener('click', hideHistoryModal);
+            
+            // 点击模态框外部关闭弹窗
+            historyModal.addEventListener('click', (e) => {
+                if (e.target === historyModal) {
+                    hideHistoryModal();
+                }
+            });
+            
+            // 清空历史记录
+            clearHistoryBtn.addEventListener('click', clearHistory);
+            
+            // 导出历史记录
+            exportHistoryBtn.addEventListener('click', exportHistory);
+            
+            // 历史列表点击事件（处理删除）
+            const historyList = document.getElementById('history-list');
+            historyList.addEventListener('click', (e) => {
+                const deleteBtn = e.target.closest('.delete-history');
+                if (deleteBtn) {
+                    const index = parseInt(deleteBtn.dataset.index);
+                    deleteHistoryItem(index);
+                }
+            });
+            
+            // 设置按钮点击事件 - 暂时使用全局函数，等待SettingsManager初始化
+            const settingsBtn = document.getElementById('settings-btn');
+            settingsBtn.addEventListener('click', () => {
+                if (window.openSettingsModal) {
+                    window.openSettingsModal();
+                }
+            });
+        }
+
+        // Select a model
+        function selectModel(modelId) {
+            // Find the model
+            const model = models.find(m => m.id === modelId);
+            if (!model) return;
+
+            // Update current model
+            currentModel = model;
+
+            // Update UI
+            currentModelName.textContent = model.name;
+            currentModelDesc.textContent = model.description;
+            currentModelIcon.innerHTML = `<span class="text-white font-bold text-lg">${model.letter}</span>`;
+
+            // Highlight selected model card
+            document.querySelectorAll('.model-card').forEach(card => {
+                if (card.dataset.modelId === modelId) {
+                    card.classList.add('active-glow');
+                } else {
+                    card.classList.remove('active-glow');
+                }
+            });
+
+            // 初始化模型的对话历史结构
+            if (!chatHistories[modelId]) {
+                chatHistories[modelId] = {
+                    conversations: [],
+                    currentIndex: -1
+                };
+            }
+            
+            // 如果没有对话，创建一个新对话
+            if (chatHistories[modelId].conversations.length === 0) {
+                const welcomeMessage = {
+                    role: 'assistant',
+                    content: `你好！我是 ${model.name}，${model.description}。有什么我可以帮助你的吗？`
+                };
+                const newConversation = {
+                    messages: [welcomeMessage],
+                    timestamp: Date.now()
+                };
+                chatHistories[modelId].conversations.push(newConversation);
+                chatHistories[modelId].currentIndex = 0;
+            }
+            
+            // 切换到当前对话
+            currentMessages = chatHistories[modelId].conversations[chatHistories[modelId].currentIndex].messages;
+            
+            // 清空并重新渲染当前对话
+            renderCurrentChat();
+        }
+        
+        // 渲染当前对话
+        function renderCurrentChat() {
+            chatMessages.innerHTML = '';
+            
+            if (currentMessages.length === 0) {
+                // 添加欢迎消息
+                const welcomeMessage = {
+                    role: 'assistant',
+                    content: `你好！我是 ${currentModel.name}，${currentModel.description}。有什么我可以帮助你的吗？`
+                };
+                currentMessages.push(welcomeMessage);
+                chatHistories[currentModel.id] = currentMessages;
+            }
+            
+            // 渲染所有消息
+            currentMessages.forEach(message => renderMessage(message));
+        }
+
+        // Send a message
+        async function sendMessage() {
+            const content = messageInput.value.trim();
+            console.log('发送消息:', content);
+            
+            // Validate input and model selection
+            if (!content) {
+                // Add visual feedback for empty message
+                messageInput.classList.add('border-red-500');
+                setTimeout(() => {
+                    messageInput.classList.remove('border-red-500');
+                }, 1000);
+                return;
+            }
+            
+            if (!currentModel) {
+                // Show model selection reminder
+                const reminder = document.createElement('div');
+                reminder.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-secondary/90 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in';
+                reminder.textContent = '请先选择一个AI模型';
+                document.body.appendChild(reminder);
+                
+                setTimeout(() => {
+                    reminder.remove();
+                }, 2000);
+                return;
+            }
+
+            // Create user message
+            const userMessage = {
+                role: 'user',
+                content
+            };
+            console.log('创建用户消息:', userMessage);
+
+            // Add to currentMessages and render
+            currentMessages.push(userMessage);
+            console.log('添加到当前对话，当前对话长度:', currentMessages.length);
+            renderMessage(userMessage);
+            // 更新当前对话的时间戳
+            chatHistories[currentModel.id].conversations[chatHistories[currentModel.id].currentIndex].timestamp = Date.now();
+            // 保存到localStorage
+            saveChatHistories();
+            console.log('保存对话历史到localStorage');
+
+            // Clear input and reset height
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+
+            // 1. 先移除“正在输入”的指示器（如果存在）
+            const typingIndicator = document.querySelector('.typing-indicator');
+            if (typingIndicator) {
+                chatMessages.removeChild(typingIndicator);
+                console.log('移除正在输入指示器');
+            }
+
+            // 2. 创建AI消息容器（用于流式填充）
+            const aiMessageElement = document.createElement('div');
+            aiMessageElement.className = 'flex items-start space-x-3 mb-6 stream-message';
+            aiMessageElement.innerHTML = `
+                <div class="w-8 h-8 rounded bg-dark-100 flex-shrink-0 flex items-center justify-center">
+                    <span class="text-white font-bold text-lg">${currentModel.letter}</span>
+                </div>
+                <div class="ai-message-content bg-dark-100/50 rounded-lg p-4 max-w-[80%] break-words whitespace-pre-wrap">
+                    <!-- 内容将在这里实时更新 -->
+                    <span class="streaming-cursor animate-pulse">█</span>
+                </div>
+            `;
+            console.log('创建AI消息容器');
+
+            chatMessages.appendChild(aiMessageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight; // 滚动到底部
+            console.log('添加AI消息容器到聊天窗口');
+
+            // 3. 流畅流式回复实现
+            let streamBuffer = '';
+            let streamAnimationInterval = null;
+            let isStreamingActive = true;
+            let fullResponse = '';
+
+            // 独立的渲染函数，以固定节奏从缓冲区取出内容渲染
+            function renderStreamToUI() {
+                // 修改1：即使流已结束（!isStreamingActive），只要缓冲区还有内容，就继续渲染完
+                if (streamBuffer.length === 0) {
+                    // 只有当缓冲区完全空了，才考虑停止
+                    if (!isStreamingActive) {
+                        clearInterval(streamAnimationInterval);
+                        streamAnimationInterval = null;
+                        // 移除光标 - 修改选择器，确保定位到当前消息
+                        const contentDiv = aiMessageElement.querySelector('.ai-message-content');
+                        if (contentDiv) {
+                            // 使用正则替换，确保移除所有可能的光标span
+                            contentDiv.innerHTML = contentDiv.innerHTML.replace(/<span class="streaming-cursor[^>]*>█<\/span>/g, '');
+                        }
+                        console.log('流式渲染结束，定时器已停止，光标已移除。');
+                    }
+                    return; // 缓冲区为空，无论流是否活跃，都暂停渲染
+                }
+                
+                // 每次从缓冲区取前N个字符进行渲染（模拟打字速度）
+                const charsPerFrame = 3; // 每帧输出3个字符，可根据需要调整
+                const chunkToRender = streamBuffer.substring(0, charsPerFrame);
+                streamBuffer = streamBuffer.substring(charsPerFrame);
+                
+                // 更新DOM
+                const contentDiv = aiMessageElement.querySelector('.ai-message-content');
+                if (contentDiv) {
+                    // 获取当前已显示的内容（不含光标）
+                    const currentHtml = contentDiv.innerHTML.replace(/<span class="streaming-cursor[^>]*>█<\/span>/g, '');
+                    // 安全地添加新字符
+                    const safeChunk = chunkToRender
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/\n/g, '<br>');
+                    
+                    // 更新内容并重新附加光标
+                    contentDiv.innerHTML = currentHtml + safeChunk + '<span class="streaming-cursor animate-pulse">█</span>';
+                    
+                    // 保持滚动
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+            }
+
+            // 3. 定义UI更新回调函数
+            const onStreamChunk = (chunk, accumulated) => {
+                console.log('收到流式数据块:', chunk, '累积长度:', accumulated.length);
+                // 保存完整响应
+                fullResponse = accumulated;
+                // 将新到的数据块添加到缓冲区
+                streamBuffer += chunk;
+                
+                // 如果还没有启动定时渲染器，则启动一个
+                if (!streamAnimationInterval) {
+                    streamAnimationInterval = setInterval(() => {
+                        renderStreamToUI();
+                    }, 60); // 每60毫秒渲染一次，约合每秒16帧，非常流畅
+                }
+            };
+            console.log('定义流式更新回调函数');
+
+            // Disable send button while waiting for response
+            sendBtn.disabled = true;
+            sendBtn.classList.add('opacity-50');
+            console.log('禁用发送按钮');
+
+            try {
+                // 4. 调用流式API函数
+                console.log('调用generateStreamingResponse，模型ID:', currentModel.id, '对话历史长度:', currentMessages.length);
+                fullResponse = await generateStreamingResponse(
+                    currentModel.id,
+                    currentMessages, // 确保这是包含最新用户消息的完整对话历史
+                    onStreamChunk
+                );
+                
+                console.log('generateStreamingResponse返回完整响应，长度:', fullResponse.length);
+                
+                // 5. 流式结束后，更新状态让渲染器完成剩余内容
+                isStreamingActive = false;
+                
+                // 6. 将AI回复保存到历史
+                const assistantMessage = {
+                    role: 'assistant',
+                    content: fullResponse
+                };
+                console.log('创建AI回复消息:', assistantMessage);
+                
+                // 添加到当前对话
+                currentMessages.push(assistantMessage);
+                console.log('添加AI回复到当前对话，当前对话长度:', currentMessages.length);
+                // 更新当前对话的时间戳
+                chatHistories[currentModel.id].conversations[chatHistories[currentModel.id].currentIndex].timestamp = Date.now();
+                // 保存到localStorage
+                saveChatHistories(true);
+                console.log('保存完整对话历史到localStorage');
+                
+                console.log('流式对话完成，字符长度:', fullResponse.length);
+                
+                // --- 新增：确保最终清理的代码 --- 
+                // 1. 标记流结束
+                isStreamingActive = false;
+                // 2. 确保使用完整的响应更新DOM
+                const contentDiv = aiMessageElement.querySelector('.ai-message-content');
+                if (contentDiv) {
+                    // 使用完整的响应内容更新DOM，确保所有内容都被显示
+                    const safeContent = fullResponse
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/\n/g, '<br>');
+                    contentDiv.innerHTML = safeContent;
+                    console.log('使用完整响应更新DOM，确保内容完整显示');
+                }
+                // 3. 清空缓冲区
+                streamBuffer = '';
+                // 4. 停止定时器
+                if (streamAnimationInterval) {
+                    clearInterval(streamAnimationInterval);
+                    streamAnimationInterval = null;
+                }
+                console.log('流式渲染结束，内容已完整显示，定时器已停止，光标已移除。');
+                // --- 新增代码结束 --- 
+                
+            } catch (error) {
+                // 7. 错误处理：在消息框中显示错误
+                console.error('流式对话失败:', error);
+                console.error('错误堆栈:', error.stack);
+                
+                // 停止渲染器
+                isStreamingActive = false;
+                clearInterval(streamAnimationInterval);
+                streamAnimationInterval = null;
+                
+                // 移除光标
+                const contentDiv = aiMessageElement.querySelector('.ai-message-content');
+                if (contentDiv) {
+                    // 使用正则替换，确保移除所有可能的光标span
+                    contentDiv.innerHTML = contentDiv.innerHTML.replace(/<span class="streaming-cursor[^>]*>█<\/span>/g, '') + `<span class="text-red-400">抱歉，对话出现错误: ${error.message}</span>`;
+                    contentDiv.classList.add('error-message');
+                }
+                
+                // 将错误消息保存到历史
+                const errorMessage = {
+                    role: 'assistant',
+                    content: `抱歉，发生错误：${error.message}`
+                };
+                currentMessages.push(errorMessage);
+                // 更新当前对话的时间戳
+                chatHistories[currentModel.id].conversations[chatHistories[currentModel.id].currentIndex].timestamp = Date.now();
+                // 保存到localStorage（强制保存错误信息）
+                saveChatHistories(true);
+            } finally {
+                // 8. 无论成功失败，最后重新启用发送按钮
+                sendBtn.disabled = false;
+                sendBtn.classList.remove('opacity-50');
+                console.log('重新启用发送按钮');
+            }
+        }
+
+        // Render a message
+        function renderMessage(message) {
+            const messageElement = document.createElement('div');
+            
+            // 创建安全的内容显示方式，支持长文本换行
+            const safeContent = message.content
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;')
+                .replace(/\n/g, '<br>');
+            
+            if (message.role === 'user') {
+                messageElement.className = 'flex items-start justify-end space-x-3 mb-6';
+                messageElement.innerHTML = `
+                    <div class="bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg p-4 max-w-[80%] word-break-all break-words whitespace-pre-wrap">
+                        <p>${safeContent}</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-secondary flex-shrink-0 flex items-center justify-center">
+                        <i class="fa fa-user"></i>
+                    </div>
+                `;
+            } else {
+                messageElement.className = 'flex items-start space-x-3 mb-6';
+                messageElement.innerHTML = `
+                    <div class="w-8 h-8 rounded bg-dark-100 flex-shrink-0 flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">${currentModel.letter}</span>
+                    </div>
+                    <div class="bg-dark-100/50 rounded-lg p-4 max-w-[80%] word-break-all break-words whitespace-pre-wrap">
+                        <p>${safeContent}</p>
+                    </div>
+                `;
+            }
+            
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Start a new chat
+        function startNewChat() {
+            if (currentModel) {
+                // 保存当前对话到历史记录
+                if (currentMessages.length > 0) {
+                    // 更新当前对话的时间戳 - 添加安全检查
+                    const modelHistory = chatHistories[currentModel.id];
+                    if (modelHistory && modelHistory.conversations && modelHistory.conversations[modelHistory.currentIndex]) {
+                        modelHistory.conversations[modelHistory.currentIndex].timestamp = Date.now();
+                    }
+                }
+                
+                // 创建新对话
+                const welcomeMessage = {
+                    role: 'assistant',
+                    content: `你好！我是 ${currentModel.name}，${currentModel.description}。有什么我可以帮助你的吗？`
+                };
+                const newConversation = {
+                    messages: [welcomeMessage],
+                    timestamp: Date.now()
+                };
+                
+                // 确保模型历史结构存在
+                if (!chatHistories[currentModel.id]) {
+                    chatHistories[currentModel.id] = {
+                        conversations: [],
+                        currentIndex: -1
+                    };
+                }
+                
+                // 添加新对话到历史记录
+                chatHistories[currentModel.id].conversations.push(newConversation);
+                chatHistories[currentModel.id].currentIndex = chatHistories[currentModel.id].conversations.length - 1;
+                
+                // 切换到新对话
+                currentMessages = newConversation.messages;
+                chatMessages.innerHTML = '';
+                renderMessage(welcomeMessage);
+                
+                // 保存到localStorage
+                saveChatHistories();
+            } else {
+                // Show welcome screen
+                chatMessages.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-center">
+                        <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/984e11d83fc84e3dbb975b72cac00cc6~tplv-a9rns2rl98-image.image?rcl=2025122419021123EC4FF5AAF0EACD0EC3&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1769166156&x-signature=rFJBG%2FgZAF1FR%2Fx3dniEOco0oqE%3D" alt="AI Hub Logo" class="w-24 h-24 mb-4 opacity-70">
+                        <h3 class="text-2xl font-bold text-gradient mb-2">欢迎使用 AI Hub</h3>
+                        <p class="text-light-200 max-w-md mb-6">选择一个AI模型开始对话，体验最先进的人工智能技术</p>
+                        <div class="flex flex-wrap justify-center gap-3">
+                            <button class="model-btn py-2 px-4 bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/30 rounded-lg hover-glow" data-model-id="deepseek-v32">
+                                <span class="text-gradient font-medium">深度求索 V3.2</span>
+                            </button>
+                            <button class="model-btn py-2 px-4 bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/30 rounded-lg hover-glow" data-model-id="tongyiqianwen3-max">
+                                <span class="text-gradient font-medium">通义千问3 Max</span>
+                            </button>
+                            <button class="model-btn py-2 px-4 bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/30 rounded-lg hover-glow" data-model-id="zhipu-glm46">
+                                <span class="text-gradient font-medium">智谱 GLM-4.6</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Reattach event listeners for welcome model buttons
+                document.querySelectorAll('.model-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const modelId = btn.dataset.modelId;
+                        selectModel(modelId);
+                    });
+                });
+            }
+        }
+        
+        // 渲染历史记录列表
+        function renderHistoryList() {
+            const historyList = document.getElementById('history-list');
+            const modelHistories = chatHistories[currentModel.id];
+            
+            // 获取当前模型的所有对话
+            const conversations = modelHistories ? modelHistories.conversations : [];
+            
+            // 过滤掉只有欢迎消息的对话
+            const validConversations = conversations.filter(conv => conv.messages.length > 1 || 
+                (conv.messages.length === 1 && conv.messages[0].role === 'user'));
+            
+            historyList.innerHTML = validConversations.length === 0 ? 
+                '<p class="text-center text-light-300 py-4">暂无历史对话</p>' :
+                validConversations.map((conv, index) => {
+                    // 获取对话的起始消息
+                    const firstUserMessage = conv.messages.find(msg => msg.role === 'user');
+                    const displayMessage = firstUserMessage ? firstUserMessage.content : conv.messages[0].content;
+                    const timestamp = new Date(conv.timestamp);
+                    
+                    return `
+                        <div class="history-item p-2 bg-dark-100/30 rounded hover:bg-dark-100/50 flex justify-between items-center">
+                            <div class="flex-1 truncate">
+                                <span class="text-xs text-light-300">${timestamp.toLocaleString()}</span>
+                                <p class="truncate">${displayMessage.substring(0, 30)}${displayMessage.length > 30 ? '...' : ''}</p>
+                            </div>
+                            <button class="delete-history ml-2 p-1 text-red-400 hover:text-red-300" data-index="${index}">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+        }
+        
+        // 显示历史记录弹窗
+        function showHistoryModal() {
+            if (!currentModel) return;
+            
+            const modal = document.getElementById('history-modal');
+            renderHistoryList();
+            modal.classList.remove('hidden');
+        }
+        
+        // 隐藏历史记录弹窗
+        function hideHistoryModal() {
+            const modal = document.getElementById('history-modal');
+            modal.classList.add('hidden');
+        }
+        
+        // 清空历史记录
+        function clearHistory() {
+            if (!currentModel) return;
+            
+            // 清空当前模型的所有对话历史
+            chatHistories[currentModel.id].conversations = [];
+            // 创建一个新的空对话
+            const welcomeMessage = {
+                role: 'assistant',
+                content: `你好！我是 ${currentModel.name}，${currentModel.description}。有什么我可以帮助你的吗？`
+            };
+            const newConversation = {
+                messages: [welcomeMessage],
+                timestamp: Date.now()
+            };
+            chatHistories[currentModel.id].conversations.push(newConversation);
+            chatHistories[currentModel.id].currentIndex = 0;
+            currentMessages = newConversation.messages;
+            // 重新渲染
+            renderCurrentChat();
+            renderHistoryList();
+            // 保存到localStorage（强制保存清理操作）
+            saveChatHistories(true);
+        }
+        
+        // 删除单个历史对话
+        function deleteHistoryItem(index) {
+            if (!currentModel) return;
+            
+            // 确保模型历史结构存在
+            if (!chatHistories[currentModel.id] || !chatHistories[currentModel.id].conversations) {
+                return;
+            }
+            
+            const modelHistories = chatHistories[currentModel.id];
+            const conversations = modelHistories.conversations;
+            
+            // 找到要删除的对话的真实索引
+            // 过滤掉只有欢迎消息的对话，得到有效对话列表
+            const validConversations = conversations.filter(conv => conv.messages.length > 1 || 
+                (conv.messages.length === 1 && conv.messages[0].role === 'user'));
+            
+            if (index >= 0 && index < validConversations.length) {
+                // 找到原始数组中的索引
+                const originalIndex = conversations.indexOf(validConversations[index]);
+                
+                // 删除对话
+                conversations.splice(originalIndex, 1);
+                
+                // 如果删除的是当前对话，切换到上一个对话
+                if (modelHistories.currentIndex === originalIndex) {
+                    // 如果还有对话，切换到上一个或第一个
+                    if (conversations.length > 0) {
+                        modelHistories.currentIndex = Math.min(originalIndex, conversations.length - 1);
+                        currentMessages = conversations[modelHistories.currentIndex].messages;
+                        renderCurrentChat();
+                    } else {
+                        // 如果没有对话了，创建一个新对话
+                        startNewChat();
+                    }
+                } else if (modelHistories.currentIndex > originalIndex) {
+                    // 如果当前对话索引大于删除的索引，调整当前索引
+                    modelHistories.currentIndex--;
+                }
+                
+                // 重新渲染历史列表
+                renderHistoryList();
+                // 保存到localStorage（强制保存删除操作）
+                saveChatHistories(true);
+            }
+        }
+        
+        // 导出当前对话
+        function exportHistory() {
+            if (!currentModel) return;
+            
+            const modelHistories = chatHistories[currentModel.id];
+            if (!modelHistories || !modelHistories.conversations) return;
+            
+            const currentConversation = modelHistories.conversations[modelHistories.currentIndex];
+            if (!currentConversation || !currentConversation.messages || currentConversation.messages.length === 0) return;
+            
+            // 格式化对话内容
+            const formattedHistory = currentConversation.messages.map(msg => {
+                const role = msg.role === 'user' ? '你' : 'AI';
+                return `${role}: ${msg.content}`;
+            }).join('\n\n');
+            
+            // 创建下载链接
+            const blob = new Blob([formattedHistory], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${currentModel.name}_对话历史.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        /**
+         * 流式调用iFlow API
+         * @param {string} modelId - 前端模型ID (如 'deepseek-v32')
+         * @param {Array} messages - 对话历史消息数组
+         * @param {Function} onChunk - 收到数据块时的回调 (chunk: string, accumulated: string) => void
+         * @returns {Promise<string>} - 返回完整的响应内容
+         */
+        async function generateStreamingResponse(modelId, messages, onChunk) {
+            // 1. 获取映射后的真实模型ID
+            const iflowModelId = modelIdMap[modelId];
+            if (!iflowModelId) {
+                throw new Error(`未知的模型ID: ${modelId}`);
+            }
+        
+            // 2. 准备请求体 (关键：stream设为true)
+            const requestBody = {
+                model: iflowModelId,
+                messages: messages,
+                stream: true, // 开启流式
+                max_tokens: 8000, // 设置为最大8000 tokens
+                temperature: 0.7,
+                top_p: 0.7,
+                frequency_penalty: 0.5
+            };
+        
+            console.log('发送流式请求:', { model: iflowModelId, stream: true });
+        
+            try {
+                // 3. 发起fetch请求
+                const response = await fetch(API_CONFIG.iflow.url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_CONFIG.iflow.key}`
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                // 4. 检查响应状态
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API响应错误:', response.status, errorText);
+                    throw new Error(`API请求失败 (${response.status}): ${errorText.substring(0, 100)}`);
+                }
+
+                // 检查是否是流式响应
+                const contentType = response.headers.get('content-type');
+                console.log('响应类型:', contentType);
+                // 记录响应头信息，便于诊断
+                console.log('响应头:', {
+                    'content-type': contentType,
+                    'content-length': response.headers.get('content-length'),
+                    'x-ratelimit-limit': response.headers.get('x-ratelimit-limit'),
+                    'x-ratelimit-remaining': response.headers.get('x-ratelimit-remaining')
+                });
+
+                // 如果是流式响应（text/event-stream）
+                if (contentType && contentType.includes('text/event-stream')) {
+                    if (!response.body) {
+                        throw new Error('响应体不可读，不支持流式输出');
+                    }
+
+                    // 5. 准备读取流
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder('utf-8');
+                    let accumulatedResponse = '';
+                    let buffer = '';
+
+                    // 6. 循环读取流数据
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) {
+                            console.log('流式响应结束，累积响应长度:', accumulatedResponse.length);
+                            break;
+                        }
+
+                        // 解码数据块并添加到缓冲区
+                        buffer += decoder.decode(value, { stream: true });
+                        console.log('收到原始数据块，长度:', value?.length || 0, '当前缓冲区:', buffer);
+                        
+                        // 按行分割处理（SSE格式是 data: {...}\n\n）
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop(); // 最后一行可能不完整，留待下次处理
+                        console.log('分割后得到', lines.length, '行，剩余缓冲区:', buffer);
+
+                        for (const line of lines) {
+                            const trimmedLine = line.trim();
+                            console.log('处理行:', trimmedLine);
+                            if (!trimmedLine) {
+                                console.log('跳过空行');
+                                continue; // 跳过空行
+                            }
+                            if (trimmedLine === 'data: [DONE]') {
+                                console.log('收到结束信号');
+                                continue; // 跳过结束信号
+                            }
+
+                            // 处理SSE格式行，支持data:和data: 两种格式
+                            let jsonData = null;
+                            if (trimmedLine.startsWith('data:')) {
+                                // 移除"data:"前缀，支持有空格和无空格两种情况
+                                jsonData = trimmedLine.substring(5).trim();
+                                console.log('处理SSE数据行，提取JSON:', jsonData);
+                            } else {
+                                console.warn('非SSE格式行，跳过:', trimmedLine);
+                                continue;
+                            }
+                            
+                            try {
+                                const parsed = JSON.parse(jsonData);
+                                
+                                console.log('解析到完整JSON:', parsed);
+                                
+                                // 7. 提取内容片段（兼容多种格式）
+                                let contentChunk = '';
+                                
+                                // 详细检查各种可能的内容字段
+                                console.log('检查内容字段:');
+                                console.log('- choices[0].delta.content:', parsed.choices?.[0]?.delta?.content);
+                                console.log('- choices[0].message.content:', parsed.choices?.[0]?.message?.content);
+                                console.log('- content:', parsed.content);
+                                console.log('- text:', parsed.text);
+                                console.log('- choices[0].message.reasoning_content:', parsed.choices?.[0]?.message?.reasoning_content);
+                                
+                                // 检查标准流式格式（delta.content）
+                                if (parsed.choices?.[0]?.delta?.content) {
+                                    contentChunk = parsed.choices[0].delta.content;
+                                    console.log('使用delta.content:', contentChunk);
+                                }
+                                // 检查非流式格式（message.content）
+                                else if (parsed.choices?.[0]?.message?.content) {
+                                    contentChunk = parsed.choices[0].message.content;
+                                    console.log('使用message.content:', contentChunk);
+                                }
+                                // 检查其他可能的内容字段
+                                else if (parsed.content) {
+                                    contentChunk = parsed.content;
+                                    console.log('使用content:', contentChunk);
+                                }
+                                // 检查文本字段
+                                else if (parsed.text) {
+                                    contentChunk = parsed.text;
+                                    console.log('使用text:', contentChunk);
+                                }
+                                // 检查GLM等模型的特殊格式
+                                else if (parsed.choices?.[0]?.message?.reasoning_content) {
+                                    contentChunk = parsed.choices[0].message.reasoning_content;
+                                    console.log('使用reasoning_content:', contentChunk);
+                                }
+                                // 检查choices[0].text格式
+                                else if (parsed.choices?.[0]?.text) {
+                                    contentChunk = parsed.choices[0].text;
+                                    console.log('使用choices[0].text:', contentChunk);
+                                }
+                                // 检查delta字段的其他可能
+                                else if (parsed.choices?.[0]?.delta) {
+                                    console.log('发现delta字段但无content:', parsed.choices[0].delta);
+                                }
+                                else {
+                                    console.log('未找到任何内容字段');
+                                }
+                                
+                                if (contentChunk) {
+                                    accumulatedResponse += contentChunk;
+                                    console.log('累积响应长度:', accumulatedResponse.length, '当前累积:', accumulatedResponse);
+                                    // 回调函数，实时更新UI
+                                    if (onChunk && typeof onChunk === 'function') {
+                                        console.log('调用onChunk回调，内容块长度:', contentChunk.length);
+                                        onChunk(contentChunk, accumulatedResponse);
+                                    }
+                                }
+                                
+                                // 检查是否结束（根据官方示例）
+                                if (parsed.choices?.[0]?.finish_reason) {
+                                    console.log('流式结束原因:', parsed.choices[0].finish_reason);
+                                    // 记录结束原因的详细信息
+                                    console.log('结束时累积响应长度:', accumulatedResponse.length);
+                                    console.log('结束时最后内容:', accumulatedResponse.slice(-100));
+                                }
+                            } catch (e) {
+                                console.error('解析SSE数据行失败:', e.message, '原始行:', trimmedLine, '提取的JSON:', jsonData);
+                                console.error('错误堆栈:', e.stack);
+                            }
+                        }
+                    }
+
+                    // 8. 返回完整响应
+                    return accumulatedResponse;
+                } else {
+                    // 非流式响应，作为降级方案处理
+                    console.log('非流式响应，作为降级方案处理');
+                    const responseData = await response.json();
+                    console.log('非流式响应数据:', responseData);
+                    
+                    // 提取内容
+                    let fullResponse = '';
+                    if (responseData.choices?.[0]?.message?.content) {
+                        fullResponse = responseData.choices[0].message.content;
+                    } else if (responseData.content) {
+                        fullResponse = responseData.content;
+                    } else if (responseData.text) {
+                        fullResponse = responseData.text;
+                    } else if (responseData.choices?.[0]?.text) {
+                        fullResponse = responseData.choices[0].text;
+                    }
+                    
+                    console.log('非流式提取到内容:', fullResponse);
+                    
+                    // 一次性更新UI
+                    if (onChunk && typeof onChunk === 'function') {
+                        onChunk(fullResponse, fullResponse);
+                    }
+                    
+                    return fullResponse;
+                }
+            } catch (error) {
+                console.error('流式请求过程出错:', error);
+                console.error('错误详情:', error.stack);
+                // 提供更友好的错误信息
+                if (error.message.includes('Failed to fetch')) {
+                    throw new Error('网络连接失败，请检查网络或API地址');
+                }
+                if (error.message.includes('Unexpected token')) {
+                    throw new Error('API返回格式异常，请确认模型是否支持流式');
+                }
+                throw error;
+            }
+        }
+
+        // Initialize the app when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+    
+    <!-- 历史记录弹窗 -->
+    <div id="history-modal" class="fixed inset-0 bg-black/50 hidden z-50">
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 bg-dark-200 rounded-lg p-4 border border-primary/30">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gradient">对话历史</h3>
+                <button id="close-history" class="p-2 hover:bg-white/10 rounded">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div id="history-list" class="space-y-2 max-h-64 overflow-y-auto scrollbar-thin">
+                <!-- 历史项将动态生成 -->
+            </div>
+            <div class="flex justify-between mt-4 pt-4 border-t border-white/10">
+                <button id="clear-history" class="px-3 py-1 bg-red-500/20 border border-red-500/30 rounded hover:bg-red-500/30">
+                    清空历史
+                </button>
+                <button id="export-history" class="px-3 py-1 bg-primary/20 border border-primary/30 rounded hover:bg-primary/30">
+                    导出当前对话
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入设置脚本 -->
+    <script src="js/settings.js"></script>
+
+</body></html>
