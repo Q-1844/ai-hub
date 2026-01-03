@@ -131,7 +131,7 @@ class SettingsManager {
         
         const modalHTML = `
             <div id="settings-modal" class="fixed inset-0 bg-black/50 hidden z-50">
-                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 bg-dark-200 rounded-lg p-6 border border-primary/30 shadow-lg shadow-primary/20 backdrop-blur-sm">
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full sm:w-96 max-w-full max-h-[90vh] overflow-y-auto bg-dark-200 rounded-lg p-6 border border-primary/30 shadow-lg shadow-primary/20 backdrop-blur-sm">
                     <!-- 弹窗头部 -->
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-xl font-bold text-gradient">设置</h3>
