@@ -880,27 +880,16 @@
                 }
             });
             
-            // 设置按钮点击事件 - 优化：直接使用SettingsManager实例
+            // 设置按钮点击事件
             const settingsBtn = document.getElementById('settings-btn');
             settingsBtn.addEventListener('click', () => {
-                // 直接创建或获取SettingsManager实例
-                if (!window.SettingsManager) {
-                    // 如果还没有初始化，立即初始化
-                    if (typeof SettingsManager === 'function') {
-                        window.SettingsManager = new SettingsManager();
-                    }
-                }
+                console.log('设置按钮被点击');
                 
-                // 确保settingsManager存在
-                if (!settingsManager && window.SettingsManager) {
-                    settingsManager = window.SettingsManager;
-                }
-                
-                // 显示设置弹窗
-                if (settingsManager) {
-                    settingsManager.showModal();
+                // 直接使用全局的window.openSettingsModal函数
+                if (typeof window.openSettingsModal === 'function') {
+                    window.openSettingsModal();
                 } else {
-                    console.error('SettingsManager初始化失败');
+                    console.error('window.openSettingsModal函数不存在');
                 }
             });
         }
