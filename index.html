@@ -132,6 +132,21 @@
             
             .title-letter.active::after {
                 opacity: 1;
+            }
+            
+            /* 确保右上角按钮正确显示 */
+            #history-btn, #settings-btn {
+                z-index: 10;
+                position: relative;
+            }
+            
+            #history-btn i, #settings-btn i {
+                display: inline-block;
+                font-size: 16px;
+            }
+            
+            .title-letter.active::after {
+                opacity: 1;
                 animation: scanWord 0.7s ease-in-out;
             }
             
@@ -334,31 +349,93 @@
     </div>
 
     <script>
-        // API配置
-        const API_CONFIG = {
-            iflow: {
-                key: 'sk-0319d229e781eb7e2cc4c208a018d052',
+        // API配置（从设置中读取）
+        function getApiConfig() {
+            const settings = window.SettingsManager ? window.SettingsManager.getSettings() : null;
+            const defaultConfig = {
+                key: 'sk-f6497fe1b0ace4b438ff7dc46a1af5ab',
                 url: 'https://apis.iflow.cn/v1/chat/completions'
+            };
+            
+            if (settings && settings.api) {
+                return {
+                    key: settings.api.apiKey || defaultConfig.key,
+                    url: settings.api.apiUrl || defaultConfig.url
+                };
             }
-        };
+            
+            return defaultConfig;
+        }
         
-        // 模型ID映射表（新界面ID -> iFlow API模型ID）
-        const modelIdMap = {
-            'deepseek-v32': 'deepseek-v3.2',
-            'tongyiqianwen3-max': 'qwen3-max',
-            'tongyiqianwen3-preview': 'qwen3-max-preview',
-            'tongyiqianwen3-235b-thinking': 'qwen3-235b-a22b-thinking-2507',
-            'tongyiqianwen3-coder': 'qwen3-coder-plus',
-            'kimi-k2-0905': 'kimi-k2-0905',
-            'zhipu-glm46': 'glm-4.6',
-            'tongyiqianwen3-vl': 'qwen3-vl-plus',
-            'tongyiqianwen3-instruct': 'qwen3-235b-a22b-instruct',
-            'kimi-k2': 'Kimi-K2',
-            'tongyiqianwen3-base': 'qwen3-235b',
-            'deepseek-r1': 'deepseek-r1',
-            'tongyiqianwen3-32b': 'qwen3-32b',
-            'deepseek-v3': 'deepseek-v3',
-            'tstars-20': 'tstars2.0'
+        // 模型管理器
+        const ModelManager = {
+            // 获取所有模型
+            getAllModels() {
+                return models;
+            },
+            
+            // 根据ID获取模型
+            getModelById(modelId) {
+                return models.find(model => model.id === modelId);
+            },
+            
+            // 获取模型的API ID
+            getModelApiId(modelId) {
+                const model = this.getModelById(modelId);
+                return model ? model.iflowModelId : null;
+            },
+            
+            // 获取模型参数配置
+            getModelParams(modelId) {
+                const model = this.getModelById(modelId);
+                return model ? {
+                    stream: true,
+                    max_tokens: model.params?.max_tokens || 8000,
+                    temperature: model.params?.temperature || 0.7,
+                    top_p: model.params?.top_p || 0.7,
+                    frequency_penalty: model.params?.frequency_penalty || 0.5,
+                    ...model.params
+                } : {
+                    stream: true,
+                    max_tokens: 8000,
+                    temperature: 0.7,
+                    top_p: 0.7,
+                    frequency_penalty: 0.5
+                };
+            },
+            
+            // 初始化模型对话历史
+            initModelHistory(modelId) {
+                if (!chatHistories[modelId]) {
+                    chatHistories[modelId] = {
+                        conversations: [],
+                        currentIndex: -1
+                    };
+                }
+                return chatHistories[modelId];
+            },
+            
+            // 创建新对话
+            createNewConversation(modelId) {
+                const model = this.getModelById(modelId);
+                if (!model) return null;
+                
+                const welcomeMessage = {
+                    role: 'assistant',
+                    content: `你好！我是 ${model.name}，${model.description}。有什么我可以帮助你的吗？`
+                };
+                
+                const newConversation = {
+                    messages: [welcomeMessage],
+                    timestamp: Date.now()
+                };
+                
+                const modelHistory = this.initModelHistory(modelId);
+                modelHistory.conversations.push(newConversation);
+                modelHistory.currentIndex = modelHistory.conversations.length - 1;
+                
+                return newConversation;
+            }
         };
         
         // Model data
@@ -367,121 +444,133 @@
                 id: 'deepseek-v32',
                 name: '深度求索 - DeepSeek V3.2',
                 description: '最新旗舰，综合顶尖',
-                icon: 'D',
                 letter: 'D',
-                iflowModelId: 'deepseek-v3.2'
+                iflowModelId: 'deepseek-v3.2',
+                category: 'flagship'
             },
             {
                 id: 'tongyiqianwen3-max',
                 name: '通义千问3 - Max',
                 description: '综合旗舰',
-                icon: 'T',
                 letter: 'T',
-                iflowModelId: 'qwen3-max'
+                iflowModelId: 'qwen3-max',
+                category: 'flagship'
             },
             {
                 id: 'tongyiqianwen3-preview',
                 name: '通义千问3 - Max Preview',
                 description: '前代综合旗舰',
-                icon: 'T',
                 letter: 'T',
-                iflowModelId: 'qwen3-max-preview'
+                iflowModelId: 'qwen3-max-preview',
+                category: 'flagship'
             },
             {
                 id: 'tongyiqianwen3-235b-thinking',
                 name: '通义千问3 - 235B A22B Thinking-2507',
                 description: '开源思考SOTA',
-                icon: 'T',
                 letter: 'T',
-                iflowModelId: 'qwen3-235b-a22b-thinking-2507'
+                iflowModelId: 'qwen3-235b-a22b-thinking-2507',
+                category: 'thinking'
             },
             {
                 id: 'tongyiqianwen3-coder',
                 name: '通义千问3 - Coder Plus',
                 description: '代码旗舰',
-                icon: 'T',
                 letter: 'T',
-                iflowModelId: 'qwen3-coder-plus'
+                iflowModelId: 'qwen3-coder-plus',
+                category: 'code',
+                params: {
+                    temperature: 0.3,
+                    max_tokens: 10000
+                }
             },
             {
                 id: 'kimi-k2-0905',
                 name: 'Kimi - K2-0905',
                 description: '编程/工具调用强者',
-                icon: 'K',
                 letter: 'K',
-                iflowModelId: 'kimi-k2-0905'
+                iflowModelId: 'kimi-k2-0905',
+                category: 'code'
             },
             {
                 id: 'zhipu-glm46',
                 name: '智谱 - GLM-4.6',
                 description: '多模态/思考链',
-                icon: 'Z',
                 letter: 'Z',
-                iflowModelId: 'glm-4.6'
+                iflowModelId: 'glm-4.6',
+                category: 'multimodal'
             },
             {
                 id: 'tongyiqianwen3-vl',
                 name: '通义千问3 - VL Plus',
                 description: '视觉语言旗舰',
-                icon: 'T',
                 letter: 'T',
-                iflowModelId: 'qwen3-vl-plus'
+                iflowModelId: 'qwen3-vl-plus',
+                category: 'multimodal'
             },
             {
                 id: 'tongyiqianwen3-instruct',
                 name: '通义千问3 - 235B A22B Instruct',
                 description: '高效指令版',
-                icon: 'T',
                 letter: 'T',
-                iflowModelId: 'qwen3-235b-a22b-instruct'
+                iflowModelId: 'qwen3-235b-a22b-instruct',
+                category: 'instruct'
             },
             {
                 id: 'kimi-k2',
                 name: 'Kimi - K2',
                 description: '前代开源MoE标杆',
-                icon: 'K',
                 letter: 'K',
-                iflowModelId: 'Kimi-K2'
+                iflowModelId: 'Kimi-K2',
+                category: 'general'
             },
             {
                 id: 'tongyiqianwen3-base',
                 name: '通义千问3 - 235B',
                 description: '基础MoE版',
-                icon: 'T',
                 letter: 'T',
-                iflowModelId: 'qwen3-235b'
+                iflowModelId: 'qwen3-235b',
+                category: 'general'
             },
             {
                 id: 'deepseek-r1',
                 name: '深度求索 - DeepSeek R1',
                 description: '推理专项模型',
-                icon: 'D',
                 letter: 'D',
-                iflowModelId: 'deepseek-r1'
+                iflowModelId: 'deepseek-r1',
+                category: 'reasoning'
             },
             {
                 id: 'tongyiqianwen3-32b',
                 name: '通义千问3 - 32B',
                 description: '高效推理模型',
-                icon: 'T',
                 letter: 'T',
-                iflowModelId: 'qwen3-32b'
+                iflowModelId: 'qwen3-32b',
+                category: 'reasoning'
             },
             {
                 id: 'deepseek-v3',
                 name: '深度求索 - DeepSeek V3',
                 description: '前代通用MoE',
-                icon: 'D',
                 letter: 'D',
-                iflowModelId: 'deepseek-v3'
+                iflowModelId: 'deepseek-v3',
+                category: 'general'
             },
             {
                 id: 'tstars-20',
                 name: 'TStars - 2.0',
                 description: '全能AI助手',
-                icon: 'T',
                 letter: 'T',
-                iflowModelId: 'tstars2.0'
+                iflowModelId: 'tstars2.0',
+                category: 'general'
+            },
+            {
+                id: 'iflow-rome-30ba3b',
+                name: 'iFlow - Rome 30ba3b',
+                description: '专业AI助手',
+                letter: 'I',
+                iflowModelId: 'iflow-rome-30ba3b',
+                category: 'general'
             }
         ];
 
@@ -595,6 +684,7 @@
 
         // Initialize the app
         function initApp() {
+            console.log('=== 初始化应用 ===');
             // 初始化DOM元素 - 现在DOM已经完全加载
             modelList = document.getElementById('model-list');
             chatMessages = document.getElementById('chat-messages');
@@ -611,10 +701,28 @@
                 return;
             }
             
+            console.log('DOM元素检查:', {
+                modelList: !!modelList,
+                chatMessages: !!chatMessages,
+                messageInput: !!messageInput,
+                sendBtn: !!sendBtn,
+                newChatBtn: !!newChatBtn,
+                currentModelName: !!currentModelName,
+                currentModelDesc: !!currentModelDesc,
+                currentModelIcon: !!currentModelIcon
+            });
+            
             loadChatHistories();
             renderModelList();
             setupEventListeners();
             setupTitleAnimation();
+            
+            // 监听API配置更新事件
+            window.addEventListener('apiConfigUpdated', (e) => {
+                console.log('API配置已更新:', e.detail);
+            });
+            
+            console.log('=== 应用初始化完成 ===');
         }
 
         // Setup title animation
@@ -799,8 +907,8 @@
 
         // Select a model
         function selectModel(modelId) {
-            // Find the model
-            const model = models.find(m => m.id === modelId);
+            // Get model using ModelManager
+            const model = ModelManager.getModelById(modelId);
             if (!model) return;
 
             // Update current model
@@ -820,32 +928,18 @@
                 }
             });
 
-            // 初始化模型的对话历史结构
-            if (!chatHistories[modelId]) {
-                chatHistories[modelId] = {
-                    conversations: [],
-                    currentIndex: -1
-                };
+            // Initialize model history and create conversation if needed
+            const modelHistory = ModelManager.initModelHistory(modelId);
+            
+            // If no conversations, create a new one
+            if (modelHistory.conversations.length === 0) {
+                ModelManager.createNewConversation(modelId);
             }
             
-            // 如果没有对话，创建一个新对话
-            if (chatHistories[modelId].conversations.length === 0) {
-                const welcomeMessage = {
-                    role: 'assistant',
-                    content: `你好！我是 ${model.name}，${model.description}。有什么我可以帮助你的吗？`
-                };
-                const newConversation = {
-                    messages: [welcomeMessage],
-                    timestamp: Date.now()
-                };
-                chatHistories[modelId].conversations.push(newConversation);
-                chatHistories[modelId].currentIndex = 0;
-            }
+            // Switch to current conversation
+            currentMessages = modelHistory.conversations[modelHistory.currentIndex].messages;
             
-            // 切换到当前对话
-            currentMessages = chatHistories[modelId].conversations[chatHistories[modelId].currentIndex].messages;
-            
-            // 清空并重新渲染当前对话
+            // Clear and re-render current chat
             renderCurrentChat();
         }
         
@@ -1157,32 +1251,14 @@
                     }
                 }
                 
-                // 创建新对话
-                const welcomeMessage = {
-                    role: 'assistant',
-                    content: `你好！我是 ${currentModel.name}，${currentModel.description}。有什么我可以帮助你的吗？`
-                };
-                const newConversation = {
-                    messages: [welcomeMessage],
-                    timestamp: Date.now()
-                };
-                
-                // 确保模型历史结构存在
-                if (!chatHistories[currentModel.id]) {
-                    chatHistories[currentModel.id] = {
-                        conversations: [],
-                        currentIndex: -1
-                    };
-                }
-                
-                // 添加新对话到历史记录
-                chatHistories[currentModel.id].conversations.push(newConversation);
-                chatHistories[currentModel.id].currentIndex = chatHistories[currentModel.id].conversations.length - 1;
+                // 使用ModelManager创建新对话
+                const newConversation = ModelManager.createNewConversation(currentModel.id);
                 
                 // 切换到新对话
-                currentMessages = newConversation.messages;
+                const modelHistory = chatHistories[currentModel.id];
+                currentMessages = modelHistory.conversations[modelHistory.currentIndex].messages;
                 chatMessages.innerHTML = '';
-                renderMessage(welcomeMessage);
+                renderMessage(currentMessages[0]);
                 
                 // 保存到localStorage
                 saveChatHistories();
@@ -1375,31 +1451,29 @@
          */
         async function generateStreamingResponse(modelId, messages, onChunk) {
             // 1. 获取映射后的真实模型ID
-            const iflowModelId = modelIdMap[modelId];
+            const iflowModelId = ModelManager.getModelApiId(modelId);
             if (!iflowModelId) {
                 throw new Error(`未知的模型ID: ${modelId}`);
             }
         
             // 2. 准备请求体 (关键：stream设为true)
+            const apiConfig = getApiConfig();
+            const modelParams = ModelManager.getModelParams(modelId);
             const requestBody = {
                 model: iflowModelId,
                 messages: messages,
-                stream: true, // 开启流式
-                max_tokens: 8000, // 设置为最大8000 tokens
-                temperature: 0.7,
-                top_p: 0.7,
-                frequency_penalty: 0.5
+                ...modelParams
             };
         
             console.log('发送流式请求:', { model: iflowModelId, stream: true });
         
             try {
                 // 3. 发起fetch请求
-                const response = await fetch(API_CONFIG.iflow.url, {
+                const response = await fetch(apiConfig.url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_CONFIG.iflow.key}`
+                        'Authorization': `Bearer ${apiConfig.key}`
                     },
                     body: JSON.stringify(requestBody)
                 });

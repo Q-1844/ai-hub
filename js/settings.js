@@ -7,6 +7,10 @@ const DEFAULT_SETTINGS = {
     history: {
         autoSave: true,
         retentionDays: 'permanent' // permanent, 30, 7, 1
+    },
+    api: {
+        apiKey: 'sk-f6497fe1b0ace4b438ff7dc46a1af5ab',
+        apiUrl: 'https://apis.iflow.cn/v1/chat/completions'
     }
 };
 
@@ -41,7 +45,12 @@ class SettingsManager {
         try {
             const saved = localStorage.getItem('aiHubSettings');
             if (saved) {
-                this.settings = JSON.parse(saved);
+                const parsed = JSON.parse(saved);
+                // 合并保存的设置和默认设置，确保新添加的api配置存在
+                this.settings = {
+                    ...DEFAULT_SETTINGS,
+                    ...parsed
+                };
             } else {
                 this.settings = { ...DEFAULT_SETTINGS };
             }
@@ -185,6 +194,47 @@ class SettingsManager {
                         </div>
                     </div>
                     
+                    <!-- API配置设置 -->
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                            <i class="fa fa-key"></i>
+                            <span>🔑 API配置</span>
+                        </h4>
+                        
+                        <!-- API密钥输入 -->
+                        <div class="mb-6">
+                            <label class="block text-light-200 text-sm mb-2">API密钥</label>
+                            <div class="flex items-center gap-3">
+                                <input 
+                                    type="password" 
+                                    id="api-key-input" 
+                                    class="flex-1 py-2 px-3 bg-dark-100 border border-white/10 rounded-lg focus:outline-none focus:border-primary/50 text-light-100"
+                                    value="${this.settings.api.apiKey}"
+                                    placeholder="输入您的API密钥"
+                                >
+                                <button 
+                                    id="toggle-api-key-visibility" 
+                                    class="px-3 py-2 bg-primary/20 border border-primary/30 rounded hover:bg-primary/30 text-sm transition-colors"
+                                >
+                                    显示
+                                </button>
+                            </div>
+                            <p class="text-xs text-light-300">修改API密钥后立即生效，无需刷新页面</p>
+                        </div>
+                        
+                        <!-- API地址输入 -->
+                        <div>
+                            <label class="block text-light-200 text-sm mb-2">API地址</label>
+                            <input 
+                                type="text" 
+                                id="api-url-input" 
+                                class="w-full py-2 px-3 bg-dark-100 border border-white/10 rounded-lg focus:outline-none focus:border-primary/50 text-light-100"
+                                value="${this.settings.api.apiUrl}"
+                                placeholder="输入API地址"
+                            >
+                        </div>
+                    </div>
+                    
                     <!-- 历史与数据设置 -->
                     <div>
                         <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -295,6 +345,29 @@ class SettingsManager {
             this.updateClearHistoryButton();
         });
         
+        // API密钥输入
+        document.getElementById('api-key-input').addEventListener('input', (e) => {
+            const apiKey = e.target.value.trim();
+            this.updateApiConfig(apiKey, this.settings.api.apiUrl);
+        });
+        
+        // API密钥显示切换
+        const apiKeyInput = document.getElementById('api-key-input');
+        const toggleApiKeyBtn = document.getElementById('toggle-api-key-visibility');
+        let apiKeyVisible = false;
+        
+        toggleApiKeyBtn.addEventListener('click', () => {
+            apiKeyVisible = !apiKeyVisible;
+            apiKeyInput.type = apiKeyVisible ? 'text' : 'password';
+            toggleApiKeyBtn.textContent = apiKeyVisible ? '隐藏' : '显示';
+        });
+        
+        // API地址输入
+        document.getElementById('api-url-input').addEventListener('input', (e) => {
+            const apiUrl = e.target.value.trim();
+            this.updateApiConfig(this.settings.api.apiKey, apiUrl);
+        });
+        
         // 立即清理按钮
         this.updateClearHistoryButton();
     }
@@ -395,6 +468,18 @@ class SettingsManager {
     // 获取当前设置
     getSettings() {
         return { ...this.settings };
+    }
+    
+    // 更新API配置并通知
+    updateApiConfig(apiKey, apiUrl) {
+        this.settings.api.apiKey = apiKey;
+        this.settings.api.apiUrl = apiUrl;
+        this.saveSettings();
+        
+        // 触发自定义事件，通知主应用API配置已更新
+        window.dispatchEvent(new CustomEvent('apiConfigUpdated', {
+            detail: { apiKey, apiUrl }
+        }));
     }
 }
 

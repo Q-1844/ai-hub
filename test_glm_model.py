@@ -3,7 +3,7 @@ import json
 
 # API配置
 API_URL = "https://apis.iflow.cn/v1/chat/completions"
-API_KEY = "sk-568e97a528aed87ecf6bcb7ef608663f"
+API_KEY = "sk-f6497fe1b0ace4b438ff7dc46a1af5ab"
 
 # 测试模型
 TEST_MODEL = "glm-4.6"
